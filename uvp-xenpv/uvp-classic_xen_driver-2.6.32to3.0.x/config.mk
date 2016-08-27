@@ -25,6 +25,9 @@ ifeq (3.0.76, $(OSVERSION))
   _XEN_CPPFLAGS += -DSUSE_1103
 endif
 
+VERSION := $(shell cat /etc/SuSE-release | grep VERSION | awk -F" " '{print $$3}')
+PATCHLEVEL := $(shell cat /etc/SuSE-release | grep PATCHLEVEL | awk -F" " '{print $$3}')
+OSTYPE := "SUSE$(VERSION)SP$(PATCHLEVEL)"
 
 EXTRA_CFLAGS += $(_XEN_CPPFLAGS)
 EXTRA_AFLAGS += $(_XEN_CPPFLAGS)

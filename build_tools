@@ -104,6 +104,19 @@ get_os_distribution_info()
     fi
 }
 
+backup_virtio_headers()
+{
+    local hacking_ops=$1
+
+    if [ "b" = "${hacking_ops}" ]
+    then
+        rename virtio VIRTIO virtio*  1>/dev/null 2>&1
+    elif [ "c" = "${hacking_ops}" ]
+    then
+        rename VIRTIO virtio VIRTIO*  1>/dev/null 2>&1
+    fi
+}
+
 build_xenpv()
 {
     local build_ops=$1
@@ -111,6 +124,17 @@ build_xenpv()
     local kern_dir="/lib/modules/$kern_ver/build"
     local mod_dir="${UVP_TOOLS_DIR}/lib/modules/xvf-${kern_ver}-${CPU_ARCH}-${OS_DIST}/"
     local mod_with_dir=""
+    local virtiohead=""
+
+    if [ "suse" == "${OS_RELEASE}" ]; then
+        virtiohead="/lib/modules/${kern_ver}/source/include/linux/"
+    else
+        echo "This os type can not build xenpv."
+    fi
+    cd . > /dev/null 2>&1
+    cd ${virtiohead} > /dev/null 2>&1
+    backup_virtio_headers $build_ops  > /dev/null 2>&1
+    cd -
     
     cd ${DRV_SRC_DIR}/${OS_DIST_SRC}
     

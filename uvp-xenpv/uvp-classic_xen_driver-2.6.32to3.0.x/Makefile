@@ -12,49 +12,23 @@ M=$(shell pwd)
 
 COMPILEARGS = $(CROSSCOMPILE)
 
-reboot=$(OSVERSION)/reboot.c
 obj-m += xen-platform-pci/
 obj-m += xen-balloon/
 obj-m += xen-vbd/
 obj-m += xen-vnif/
 obj-m += xen-hcall/
-ifneq (3.0.101, $(OSVERSION))
-obj-m += xen-vmdq/
-endif
-ifeq (2.6.32, $(OSVERSION))
-ifeq (x86_64, $(KERNELARCH))
-reboot=reboot_64.c
-endif
-endif
 
-ifeq (3.0.58, $(OSVERSION))
-OSVERSION=3.0.13
-endif
-
-ifeq (3.0.80, $(OSVERSION))
-OSVERSION=3.0.13
-endif
-
-###vni_front for VSA
-ifeq ("2.6.32.59-0.7-default", "$(BUILDKERNEL)")
+ifeq ("SUSE11SP3", $(OSTYPE))
+OSVERSION=3.0.76
 obj-m += vni_front/
 endif
 
-ifeq ("3.0.13-0.27-default", "$(BUILDKERNEL)")
-obj-m += vni_front/
-endif
-
-ifeq ("3.0.13-0.27-pae", "$(BUILDKERNEL)")
-obj-m += vni_front/
-endif
-
-ifeq (3.0.76, $(OSVERSION))
-obj-m += vni_front/
-endif
-
-ifeq (3.0.101, $(OSVERSION))
+ifeq ("SUSE11SP4", $(OSTYPE))
+OSVERSION=3.0.101
 obj-m += xen-scsi/
 endif
+
+reboot=$(OSVERSION)/reboot.c
 
 all:lnfile
 	make -C $(KERNDIR) M=$(M) modules $(COMPILEARGS)

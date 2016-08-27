@@ -20,16 +20,12 @@ obj-m += xen-vbd/
 obj-m += xen-vnif/
 obj-m += xen-hcall/
 
-ifeq (3.12.28, $(OSVERSION))
-src_path=3.12.28
+ifeq ("SUSE12SP1", $(OSTYPE))
+OSVERSION=3.12.49
 endif
 
-ifeq (3.12.49, $(OSVERSION))
-src_path=3.12.49
-endif
-
-ifeq (3.16.6, $(OSVERSION))
-src_path=3.12.28
+ifeq ("SUSE12SP0", $(OSTYPE))
+OSVERSION=3.12.28
 endif
 
 all:lnfile
@@ -55,9 +51,9 @@ lnfile:
 			continue; \
 		fi; \
 		cd $$dir; \
-		for file in `ls $(src_path)`; \
+		for file in `ls $(OSVERSION)`; \
 		do \
-			ln -sf $(src_path)/$$file $$file; \
+			ln -sf $(OSVERSION)/$$file $$file; \
 		done; \
 		cd -; \
 	done; \
