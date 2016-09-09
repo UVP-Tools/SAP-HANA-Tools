@@ -1,0 +1,10 @@
+Index: uvp-xenpv/uvp-classic_xen_driver-2.6.32to3.0.x/vni_front/3.0.76/virtio.c
+===================================================================
+--- uvp-xenpv.orig/uvp-classic_xen_driver-2.6.32to3.0.x/vni_front/3.0.76/virtio.c
++++ uvp-xenpv/uvp-classic_xen_driver-2.6.32to3.0.x/vni_front/3.0.76/virtio.c
+@@ -1,4 +1,5 @@
++#include <linux/version.h>
+ #include <linux/virtio.h>
+ #include <linux/spinlock.h>
+ #include <linux/virtio_config.h>
+ #include <linux/module.h>

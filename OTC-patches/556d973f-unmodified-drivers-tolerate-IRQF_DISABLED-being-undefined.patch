@@ -1,0 +1,34 @@
+# Commit fed56ba0e69b251d0222ef0785cd1c1838f9e51d
+# Date 2015-06-02 13:45:03 +0200
+# Author Jan Beulich <jbeulich@suse.com>
+# Committer Jan Beulich <jbeulich@suse.com>
+unmodified-drivers: tolerate IRQF_DISABLED being undefined
+
+It's being removed in Linux 4.1.
+
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Acked-by: Ian Campbell <ian.campbell@citrix.com>
+Acked-by: Kurt Garloff <t-systems@garloff.de>
+
+Index: uvp-xenpv/uvp-classic_xen_driver-3.12.xto3.16.x/xen-platform-pci/evtchn.c
+===================================================================
+--- uvp-xenpv.orig/uvp-classic_xen_driver-3.12.xto3.16.x/xen-platform-pci/evtchn.c
++++ uvp-xenpv/uvp-classic_xen_driver-3.12.xto3.16.x/xen-platform-pci/evtchn.c
+@@ -349,12 +349,14 @@ int xen_irq_init(struct pci_dev *pdev)
+ 	return request_irq(pdev->irq, evtchn_interrupt,
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
+ 			   SA_SHIRQ | SA_SAMPLE_RANDOM | SA_INTERRUPT,
+ #else
+-			   IRQF_SHARED |
+ #ifdef IRQF_SAMPLE_RANDOM
+ 			   IRQF_SAMPLE_RANDOM |
+ #endif
+-			   IRQF_DISABLED,
++#ifdef IRQF_DISABLED
++			   IRQF_DISABLED |
++#endif
++			   IRQF_SHARED,
+ #endif
+ 			   "xen-platform-pci", pdev);
+ }
+\ No newline at end of file

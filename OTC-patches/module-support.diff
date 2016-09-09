@@ -1,0 +1,11 @@
+Index: uvp-xenpv/uvp-classic_xen_driver-2.6.32to3.0.x/Module.supported
+===================================================================
+--- /dev/null
++++ uvp-xenpv/uvp-classic_xen_driver-2.6.32to3.0.x/Module.supported
+@@ -0,0 +1,6 @@
++xen-platform-pci.ko external
++xen-vbd.ko external
++xen-scsi.ko external
++xen-vnif.ko external
++xen-balloon.ko external
++xen-hcall.ko external

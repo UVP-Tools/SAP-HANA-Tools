@@ -1,0 +1,56 @@
+From: Kurt Garloff <kurt@garloff.de>
+Subject: Register xen/xenbus misc device
+References: git commit 2fb3683e to linux-stable tree
+
+This is a port of
+https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/commit/?id=2fb3683e7b164ee2b324039f7c9d90fe5b1a259b
+
+Signed-off-by: kurt@garloff.de
+diff -uNrp uvp-xenpv.1/uvp-pvops_xen_driver-2.6.32to4.0.x/xen-procfs/xen-procfs.c uvp-xenpv.2/uvp-pvops_xen_driver-2.6.32to4.0.x/xen-procfs/xen-procfs.c
+--- uvp-xenpv.1/uvp-pvops_xen_driver-2.6.32to4.0.x/xen-procfs/xen-procfs.c	2016-09-06 00:34:20.184805784 +0200
++++ uvp-xenpv.2/uvp-pvops_xen_driver-2.6.32to4.0.x/xen-procfs/xen-procfs.c	2016-09-06 00:39:35.484805663 +0200
+@@ -10,6 +10,7 @@
+  */
+ #include <linux/init.h>
+ #include <linux/module.h>
++#include <linux/miscdevice.h>
+ #include <linux/kernel.h>
+ #include <linux/errno.h>
+ #include <linux/proc_fs.h>
+@@ -387,6 +388,14 @@ static const struct file_operations xenb
+ 	.poll = xenbus_dev_poll,
+ };
+ 
++//EXPORT_SYMBOL_GPL(xenbus_dev_file_ops);
++static struct miscdevice xenbus_dev = {
++	.minor = MISC_DYNAMIC_MINOR,
++	.name = "xen/xenbus",
++	.fops = &xenbus_dev_file_ops,
++};
++
++
+ static int xenbus_procfs_init(void)
+ {
+     int ret = 0;
+@@ -415,6 +424,11 @@ static int xenbus_procfs_init(void)
+         printk( KERN_INFO "Procfs: xenbus version has been created.\n" );
+     }
+ 
++    /* Also register /dev/xen/xenbus */
++    ret = misc_register(&xenbus_dev);
++    if (ret)
++	printk(KERN_ERR "Could not register xenbus device\n");
++
+     return ret;
+ }
+ module_init(xenbus_procfs_init);
+@@ -423,7 +437,8 @@ static void xenbus_procfs_exit(void)
+ {
+     remove_proc_entry( "xen/xenbus", NULL );
+     remove_proc_entry( "xen/version", NULL );
+-    printk( KERN_INFO "Procfs: xenbus user-space has been deleted.\n" );
++    printk(KERN_INFO "Procfs: xenbus user-space has been deleted.\n" );
++    misc_deregister(&xenbus_dev);
+ }
+ module_exit(xenbus_procfs_exit);
+ 

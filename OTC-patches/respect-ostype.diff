@@ -1,0 +1,76 @@
+Index: uvp-xenpv/uvp-classic_xen_driver-2.6.32to3.0.x/config.mk
+===================================================================
+--- uvp-xenpv.orig/uvp-classic_xen_driver-2.6.32to3.0.x/config.mk
++++ uvp-xenpv/uvp-classic_xen_driver-2.6.32to3.0.x/config.mk
+@@ -24,11 +24,13 @@ endif
+ ifeq (3.0.76, $(OSVERSION))
+   _XEN_CPPFLAGS += -DSUSE_1103
+ endif
+ 
++ifndef OSTYPE
+ VERSION := $(shell cat /etc/SuSE-release | grep VERSION | awk -F" " '{print $$3}')
+ PATCHLEVEL := $(shell cat /etc/SuSE-release | grep PATCHLEVEL | awk -F" " '{print $$3}')
+ OSTYPE := "SUSE$(VERSION)SP$(PATCHLEVEL)"
++endif
+ 
+ EXTRA_CFLAGS += $(_XEN_CPPFLAGS)
+ EXTRA_AFLAGS += $(_XEN_CPPFLAGS)
+ CPPFLAGS := -I$(M)/include $(CPPFLAGS)
+Index: uvp-xenpv/uvp-classic_xen_driver-2.6.32to3.0.x/Makefile
+===================================================================
+--- uvp-xenpv.orig/uvp-classic_xen_driver-2.6.32to3.0.x/Makefile
++++ uvp-xenpv/uvp-classic_xen_driver-2.6.32to3.0.x/Makefile
+@@ -16,22 +16,25 @@ obj-m += xen-platform-pci/
+ obj-m += xen-balloon/
+ obj-m += xen-vbd/
+ obj-m += xen-vnif/
+ obj-m += xen-hcall/
++#obj-m += vni_front/
++#obj-m += xen-scsi/
+ 
+-ifeq ("SUSE11SP3", $(OSTYPE))
+-OSVERSION=3.0.76
+-obj-m += vni_front/
+-endif
+-
+-ifeq ("SUSE11SP4", $(OSTYPE))
+-OSVERSION=3.0.101
+-obj-m += xen-scsi/
+-endif
++#ifeq ("SUSE11SP3", $(OSTYPE))
++#OSVERSION=3.0.76
++#obj-m += vni_front/
++#endif
++#
++#ifeq ("SUSE11SP4", $(OSTYPE))
++#OSVERSION=3.0.101
++#obj-m += xen-scsi/
++#endif
+ 
+ reboot=$(OSVERSION)/reboot.c
+ 
+ all:lnfile
++	echo "Building modules $(obj-m) for $(OSTYPE)"
+ 	make -C $(KERNDIR) M=$(M) modules $(COMPILEARGS)
+ 
+ modules_install:lnfile
+ 	make -C $(KERNDIR) M=$(M) modules_install $(COMPILEARGS)
+Index: uvp-xenpv/uvp-classic_xen_driver-3.12.xto3.16.x/Makefile
+===================================================================
+--- uvp-xenpv.orig/uvp-classic_xen_driver-3.12.xto3.16.x/Makefile
++++ uvp-xenpv/uvp-classic_xen_driver-3.12.xto3.16.x/Makefile
+@@ -11,12 +11,12 @@ M=$(shell pwd)
+ -include $(M)/config.mk
+ COMPILEARGS = $(CROSSCOMPILE)
+ 
+ obj-m += xen-platform-pci/
+-ifneq ("3.16.6", "$(OSVERSION)")
++#ifneq ("3.16.6", "$(OSVERSION)")
+ obj-m += xen-balloon/
+ obj-m += xen-scsi/
+-endif
++#endif
+ obj-m += xen-vbd/
+ obj-m += xen-vnif/
+ obj-m += xen-hcall/
+ 

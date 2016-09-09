@@ -1,0 +1,13 @@
+%if 0%{?suse_version} > 0
+Requires:	kernel-%1
+%if 0%{?suse_version} >= 1110
+Enhances:	kernel-%1
+#Supplements:	packageand(kernel-%1:%{-n*})
+%endif
+%endif
+
+%description
+This is the KMP/KMOD package for Huawei's Xen/UVP hypervisor and contains two kernel modules:
+* xen-hcall.ko allows time sync from the host
+* xen-procfs.ko allows controlled access to host's xenstore for monitoring and state tracking
+Both modules are used by the uvp-monitor userspace daemon.
