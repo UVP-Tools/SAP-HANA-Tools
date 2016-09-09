@@ -13,7 +13,7 @@ BuildRequires: %kernel_module_package_buildreqs
 License:	GPL-2.0
 Group:		System/Kernel
 Summary:	Xen kernel drivers for enhanced monitoring and performance 
-Version:	2.2.0.308
+Version:	2.2.0.309
 Release:	18.1
 Source0:	SAP-HANA-Tools-%{version}.tar.gz
 Source1:	preamble
