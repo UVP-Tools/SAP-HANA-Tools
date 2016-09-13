@@ -41,7 +41,7 @@
 # error "please don't include this file directly"
 #endif
 
-/*if hypercall memory_op function return failed, need retry,w00205029 2012-01-12*/
+/* if hypercall memory_op function return failed, need retry */
 #define HYPERCALL_X86_RETRY 128
 #define HYPERCALL_X86_ERROR  11
 
@@ -265,7 +265,7 @@ HYPERVISOR_memory_op(
 	if (arch_use_lazy_mmu_mode())
 		xen_multicall_flush(false);
 	
-	/*when hypercall  memory_op failed,retry,w00205029 2012-01-12*/
+	/* when hypercall memory_op failed,retry */
 	do{
 		rc = _hypercall2(int, memory_op, cmd, arg);
 		if (unlikely(rc == -HYPERCALL_X86_ERROR)){

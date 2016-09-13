@@ -74,7 +74,7 @@ struct pci_dev *xen_platform_pdev;
 static unsigned long shared_info_frame;
 static uint64_t callback_via;
 
-/*driver should write xenstore flag to tell xen which feature supported, add by w00205029 2012-01-17*/
+/* driver should write xenstore flag to tell xen which feature supported */
 void  write_feature_flag()
 {
 	int rc;

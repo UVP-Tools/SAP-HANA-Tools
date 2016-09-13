@@ -226,7 +226,7 @@ static void netif_disconnect_backend(struct netfront_info *);
 static int network_connect(struct net_device *);
 static void network_tx_buf_gc(struct net_device *);
 static void network_alloc_rx_buffers(struct net_device *);
-static void send_fake_arp(struct net_device *, int arpType); /* Added by luwei KF29836, DTS2011041502151 */
+static void send_fake_arp(struct net_device *, int arpType);
 
 static irqreturn_t netif_int(int irq, void *dev_id);
 
@@ -637,7 +637,7 @@ static void backend_changed(struct xenbus_device *dev,
  * @param dev device
  * @return 0 on success, error code otherwise
  */
-static void send_fake_arp(struct net_device *dev, int arpType) /* Added by luwei KF29836, DTS2011041502151 */
+static void send_fake_arp(struct net_device *dev, int arpType)
 {
 #ifdef CONFIG_INET
 	struct sk_buff *skb;
@@ -650,8 +650,7 @@ static void send_fake_arp(struct net_device *dev, int arpType) /* Added by luwei
 	if (src_ip == 0)
 		return;
 
-	//Modified by luwei KF29836, DTS2011041502151
-	//creat GARP
+	// creat GARP
 	if ( ARPOP_REQUEST == arpType )
 	{
 		skb = arp_create(ARPOP_REQUEST, ETH_P_ARP,
@@ -666,7 +665,6 @@ static void send_fake_arp(struct net_device *dev, int arpType) /* Added by luwei
 			 /*dst_hw*/ NULL, /*src_hw*/ NULL,
 			 /*target_hw*/ dev->dev_addr);
 	}
-	//Modify end
 	
 	if (skb == NULL)
 		return;
@@ -724,15 +722,12 @@ static int network_open(struct net_device *dev)
 	}
 
 	/**
-	 * Author: j00196667
-     * Date  : 2011-08-26
-     * Description: 
-     *         When NIC device has been actived successfully, operstate which is 
+	 * Description: 
+	 *         When NIC device has been actived successfully, operstate which is 
 	 *         member of netdev structure should be set to UP.
 	 */
-    np->netdev->operstate = (IF_OPER_DOWN != np->netdev->operstate) ?
+	np->netdev->operstate = (IF_OPER_DOWN != np->netdev->operstate) ?
                             IF_OPER_UP : IF_OPER_DOWN;
-	/****************************************************************************/
 
 	spin_unlock_bh(&np->rx_lock);
 
@@ -1913,8 +1908,6 @@ static void xennet_set_features(struct net_device *dev)
 }
 
 /**
- * Author: l00165244 & j00196667
- * Date  : 2011-08-23
  * Description: 
  *         Get device-specific settings
  * Version: 
@@ -1948,8 +1941,6 @@ static int netfront_get_settings(struct net_device *dev,
 }
 
 /**
- * Author: l00165244 & j00196667
- * Date  : 2011-08-23
  * Description: 
  *         Report whether Wake-on-Lan is enabled
  */
@@ -1975,8 +1966,6 @@ static void netfront_get_wol(struct net_device *dev,
 }
 
 /**
- * Author: l00165244 & j00196667
- * Date  : 2011-08-23
  * Description: 
  *         Report driver message level
  */
@@ -2106,16 +2095,14 @@ static void netif_uninit(struct net_device *dev)
 
 static const struct ethtool_ops network_ethtool_ops =
 {
-    /**
-     * Author: l00165244 & j00196667
-     * Date  : 2011-08-23
-     * Description: 
-     *         Added some information for ethtool.
-     */
+	/**
+	 * Description: 
+	 *         Added some information for ethtool.
+	 */
 	.get_settings = netfront_get_settings,
 	.get_wol      = netfront_get_wol,
 	.get_msglevel = netfront_get_msglevel,
-	/*-----------------------end----------------------*/
+
 	.get_drvinfo = netfront_get_drvinfo,
 	.get_tx_csum = ethtool_op_get_tx_csum,
 	.set_tx_csum = ethtool_op_set_tx_csum,
@@ -2368,16 +2355,14 @@ inetdev_notify(struct notifier_block *this, unsigned long event, void *ptr)
 	/* UP event and is it one of our devices? */
 	if (event == NETDEV_UP && dev->netdev_ops->ndo_open == network_open)
 	{
-		//Added by luwei KF29836, DTS2011041502151
 		for (count=0; count<3; count++)
 		{
 			(void)send_fake_arp(dev, ARPOP_REQUEST);
 		}
-		//Add end
 		
 		for (count=0; count<3; count++)
 		{
-			(void)send_fake_arp(dev, ARPOP_REPLY); /* Added by luwei KF29836, DTS2011041502151 */
+			(void)send_fake_arp(dev, ARPOP_REPLY);
 		}
 	}
 

@@ -962,7 +962,7 @@ void unregister_xenstore_notifier(struct notifier_block *nb)
 }
 EXPORT_SYMBOL_GPL(unregister_xenstore_notifier);
 
-#if defined(VRM) /* <2012-05-26 by liuyingdong> support kexec and kdump */
+#if defined(VRM)
 static DECLARE_WAIT_QUEUE_HEAD(backend_state_wq);
 static int backend_state;
 
@@ -1086,11 +1086,11 @@ void xenbus_probe(struct work_struct *unused)
 {
 	BUG_ON(!is_xenstored_ready());
 
-#if defined(VRM) /* <2012-05-26 by liuyingdong> support kexec and kdump */
+#if defined(VRM)
 	printk(KERN_EMERG "%s: xenbus_reset_state.\n", __func__);
-    /* reset devices in Connected or Closed state */
+	/* reset devices in Connected or Closed state */
 	xenbus_reset_state();
-#endif /* <2012-05-26 by liuyingdong> support kexec and kdump */
+#endif
 
 	/* Enumerate devices in xenstore and watch for changes. */
 	xenbus_probe_devices(&xenbus_frontend);

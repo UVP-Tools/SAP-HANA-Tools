@@ -628,7 +628,6 @@ static void backend_changed(struct xenbus_device *dev,
  * @param dev device
  * @return 0 on success, error code otherwise
  */
- /* Added by luwei KF29836, DTS2011041502151 */
 static void send_fake_arp(struct net_device *dev, int arpType) 
 {
 #ifdef CONFIG_INET
@@ -642,8 +641,7 @@ static void send_fake_arp(struct net_device *dev, int arpType)
 	if (src_ip == 0)
 		return;
 
-	//Modified by luwei KF29836, DTS2011041502151
-	//creat GARP
+	// creat GARP
 	if ( ARPOP_REQUEST == arpType )
 	{
 		skb = arp_create(ARPOP_REQUEST, ETH_P_ARP,
@@ -1849,8 +1847,6 @@ static void xennet_get_ethtool_stats(struct net_device *dev,
 }
 
 /**
- * Author: l00165244 & j00196667
- * Date  : 2011-08-23
  * Description: 
  *         Get device-specific settings
  * Version: 
@@ -1883,8 +1879,6 @@ static int netfront_get_settings(struct net_device *dev,
 }
 
 /**
- * Author: l00165244 & j00196667
- * Date  : 2011-08-23
  * Description: 
  *         Report whether Wake-on-Lan is enabled
  */
@@ -1910,8 +1904,6 @@ static void netfront_get_wol(struct net_device *dev,
 }
 
 /**
- * Author: l00165244 & j00196667
- * Date  : 2011-08-23
  * Description: 
  *         Report driver message level
  */
@@ -2056,16 +2048,14 @@ static void netif_uninit(struct net_device *dev)
 
 static const struct ethtool_ops network_ethtool_ops =
 {
-   /**
-     * Author: l00165244 & j00196667
-     * Date  : 2011-08-23
-     * Description: 
-     *         Added some information for ethtool.
-     */
+	/*
+	 * Description: 
+	 *         Added some information for ethtool.
+	 */
 	.get_settings = netfront_get_settings,
 	.get_wol      = netfront_get_wol,
 	.get_msglevel = netfront_get_msglevel,
-	/*-----------------------end----------------------*/
+
 	.get_drvinfo = netfront_get_drvinfo,
 	.get_tx_csum = ethtool_op_get_tx_csum,
 	.set_tx_csum = ethtool_op_set_tx_csum,
@@ -2380,16 +2370,14 @@ inetdev_notify(struct notifier_block *this, unsigned long event, void *ptr)
 	/* UP event and is it one of our devices? */
 	if (event == NETDEV_UP && dev->netdev_ops->ndo_open == network_open)
 	{
-		//Added by luwei KF29836, DTS2011041502151
 		for (count=0; count<3; count++)
 		{
 			(void)send_fake_arp(dev, ARPOP_REQUEST);
 		}
-		//Add end
 		
 		for (count=0; count<3; count++)
 		{
-			(void)send_fake_arp(dev, ARPOP_REPLY); /* Added by luwei KF29836, DTS2011041502151 */
+			(void)send_fake_arp(dev, ARPOP_REPLY);
 		}
 	}
 

@@ -79,7 +79,6 @@ static void blkif_recover(struct blkfront_info *);
 static void blkif_completion(struct blk_shadow *);
 static void blkif_free(struct blkfront_info *, int);
 
-//wlz
 static void  write_frontend_state_flag(const char * nodename);
 
 /**
@@ -479,7 +478,6 @@ static void connect(struct blkfront_info *info)
 
 	register_vcd(info);
 
-	//wlz:fix  DTS2012082906071
 	if (strstr(info->xbdev->nodename,"vbd"))
 	{
 		printk(KERN_ERR "%s is connected\n",info->xbdev->nodename);
@@ -488,7 +486,6 @@ static void connect(struct blkfront_info *info)
 }
 
 
-//wlz
 static void  write_frontend_state_flag(const char * nodename)
 {
 	int rc;
@@ -1028,7 +1025,6 @@ static void blkif_recover(struct blkfront_info *info)
 
 	spin_unlock_irq(&blkif_io_lock);
 
-	//wlz:fix  DTS2012082906071
 	if (strstr(info->xbdev->nodename,"vbd"))
 	{
 		printk(KERN_ERR "%s has been blkif_recovered\n",info->xbdev->nodename);

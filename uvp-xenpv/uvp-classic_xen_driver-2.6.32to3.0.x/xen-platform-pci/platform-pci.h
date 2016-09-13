@@ -24,12 +24,12 @@
 
 #include <linux/pci.h>
 
-/*the features  pvdriver supported add by w00205029 2012-01-17*/
+/* the features pvdriver supported */
 #define XENPAGING   0x1
 #define SUPPORTED_FEATURE  XENPAGING
 
 extern void  write_feature_flag(void);
-extern void  write_monitor_service_flag(void);//wlz
+extern void  write_monitor_service_flag(void);
 /*when xenpci resume succeed, write this flag, then uvpmonitor call ndsend*/
 extern void  write_driver_resume_flag(void);
 unsigned long alloc_xen_mmio(unsigned long len);
