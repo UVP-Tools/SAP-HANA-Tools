@@ -13,11 +13,10 @@ BuildRequires: %kernel_module_package_buildreqs
 License:	GPL-2.0
 Group:		System/Kernel
 Summary:	Xen kernel drivers for enhanced monitoring and performance 
-Version:	2.2.0.309
+Version:	2.2.0.312
 Release:	18.1
 Source0:	SAP-HANA-Tools-%{version}.tar.gz
 Source1:	preamble
-#Source2:	UVP-Tools-2.2.0.302.tar.gz
 Patch0:		kverdep.diff
 Patch1:		556d973f-unmodified-drivers-tolerate-IRQF_DISABLED-being-undefined.patch
 Patch2:		xen-misc-device.diff
