@@ -11,6 +11,7 @@ M=$(shell pwd)
 -include $(M)/config.mk
 COMPILEARGS = $(CROSSCOMPILE)
 
+ifeq ($(OSTYPE), $(filter SUSE12SP0 SUSE12SP1, $(OSTYPE)))
 obj-m += xen-platform-pci/
 ifneq ("3.16.6", "$(OSVERSION)")
 obj-m += xen-balloon/
@@ -19,6 +20,9 @@ endif
 obj-m += xen-vbd/
 obj-m += xen-vnif/
 obj-m += xen-hcall/
+else
+obj-m := xen-scsi/
+endif
 
 ifeq ("SUSE12SP1", $(OSTYPE))
 OSVERSION=3.12.49

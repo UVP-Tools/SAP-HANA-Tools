@@ -51,6 +51,8 @@
 /* NR_GRANT_FRAMES must be less than or equal to that configured in Xen */
 #define NR_GRANT_FRAMES 4
 
+#define GRANT_INVALID_REF 0
+
 struct gnttab_free_callback {
 	struct gnttab_free_callback *next;
 	void (*fn)(void *);

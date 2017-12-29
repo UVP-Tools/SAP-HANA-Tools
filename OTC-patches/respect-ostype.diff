@@ -55,22 +55,4 @@ Index: uvp-xenpv/uvp-classic_xen_driver-2.6.32to3.0.x/Makefile
  
  modules_install:lnfile
  	make -C $(KERNDIR) M=$(M) modules_install $(COMPILEARGS)
-Index: uvp-xenpv/uvp-classic_xen_driver-3.12.xto3.16.x/Makefile
-===================================================================
---- uvp-xenpv.orig/uvp-classic_xen_driver-3.12.xto3.16.x/Makefile
-+++ uvp-xenpv/uvp-classic_xen_driver-3.12.xto3.16.x/Makefile
-@@ -11,12 +11,12 @@ M=$(shell pwd)
- -include $(M)/config.mk
- COMPILEARGS = $(CROSSCOMPILE)
- 
- obj-m += xen-platform-pci/
--ifneq ("3.16.6", "$(OSVERSION)")
-+#ifneq ("3.16.6", "$(OSVERSION)")
- obj-m += xen-balloon/
- obj-m += xen-scsi/
--endif
-+#endif
- obj-m += xen-vbd/
- obj-m += xen-vnif/
- obj-m += xen-hcall/
  

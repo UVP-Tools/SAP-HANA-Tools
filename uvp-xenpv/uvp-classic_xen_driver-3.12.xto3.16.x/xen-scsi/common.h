@@ -47,19 +47,31 @@
 #include <scsi/scsi_host.h>
 #include <xen/barrier.h>
 #include <xen/xenbus.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+#include <xen/grant_table.h>
+#else
 #include <xen/gnttab.h>
+#endif
 #include <xen/evtchn.h>
 #include <xen/interface/xen.h>
 #include <xen/interface/io/ring.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+#include <xen/events.h>
+#include <asm/xen/page.h>
+#endif
 #include "../include/xen/interface/io/vscsiif.h"
 #include <xen/interface/grant_table.h>
 #include <xen/interface/io/protocols.h>
 #include <asm/delay.h>
 #include <asm/hypervisor.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,21)
 #include <asm/maddr.h>
+#endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,21)
 #ifdef HAVE_XEN_PLATFORM_COMPAT_H
 #include <xen/platform-compat.h>
+#endif
 #endif
 
 #define VSCSI_IN_ABORT              1
@@ -67,6 +79,9 @@
 
 #define DMA_VSCSI_INDIRECT          4
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+#define GRANT_INVALID_REF       0
+#endif
 /* tuning point*/
 #define VSCSIIF_DEFAULT_CMD_PER_LUN 128
 #define VSCSIIF_MAX_TARGET          64

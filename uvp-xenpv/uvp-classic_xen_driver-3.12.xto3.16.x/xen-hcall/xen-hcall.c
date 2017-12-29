@@ -44,7 +44,14 @@
 #include <xen/xenbus.h>
 #include <xen/interface/xen.h>
 #include <asm/hypervisor.h>
+
+#if (defined PROC_FS_DECLARE)
+#include "linux/internal.h"
+#include "linux/hypercall.h"
+#else
 #include <asm/hypercall.h>
+#endif
+
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Xen DomU Hypercall Filesystem");
@@ -59,6 +66,11 @@ MODULE_DESCRIPTION("Xen DomU Hypercall Filesystem");
 struct xen_hvm_hosttime_param  {
    uint64_t utc_time;    /* nsec */
 };
+
+#if (defined PROC_XEN_VERSION)
+static struct proc_dir_entry *proc_xen;
+static struct proc_dir_entry *proc_xen_version;
+#endif
 
 static struct proc_dir_entry *proc_entry;
 
@@ -109,6 +121,68 @@ static int hcall_procfs_init(void)
         printk( KERN_INFO "Xen_hcall: DomU hypercall user-space has been created.\n" );
     }
 
+#if (defined PROC_XEN_VERSION)
+    struct file *filp = NULL;
+    struct inode *inode = NULL;
+    struct proc_dir_entry *pe = NULL;
+    /* get parent proc_dir_entry */
+    filp = filp_open("/proc/xen", O_RDONLY, 0644);
+    if (NULL == filp)
+    {
+        proc_xen_version = proc_create( "xen/version", S_IRUSR, NULL, &hcall_file_ops);
+        if (NULL == proc_xen_version)
+        {
+            ret = -ENOMEM;
+            printk( KERN_INFO "Xen-hcall: Couldn't create xen_version!\n");
+        }
+        return ret;
+    }
+    inode = filp->f_path.dentry->d_inode;
+    if (NULL == inode)
+    {
+        filp_close(filp, NULL);
+        filp = NULL;
+        return -ENOMEM;
+    }
+    pe = PDE(inode);
+    if (NULL == pe)
+    {
+        filp_close(filp, NULL);
+        filp = NULL;
+        return -ENOMEM;
+    }
+    if (S_ISDIR(pe->mode) && !pe->proc_iops)
+    {
+        printk(KERN_INFO "The file %s is permanently empty directory!\n", pe->name);
+        filp_close(filp, NULL);
+        filp = NULL;
+        remove_proc_entry("xen", NULL);
+        proc_xen = proc_mkdir("xen", NULL);
+        if (NULL == proc_xen)
+        {
+            printk(KERN_INFO "Create dir /proc/xen error!\n");
+            return -ENOMEM;
+        }
+        proc_xen_version = proc_create("version", S_IRUSR, proc_xen, &hcall_file_ops);
+        if (NULL == proc_xen_version)
+        {
+            printk(KERN_INFO "Xen-hcall: Couldn't create xen_version!\n");
+            return -ENOMEM;
+        }
+    }
+    else
+    {
+        proc_xen_version = proc_create("version", S_IRUSR, pe, &hcall_file_ops);
+        if (NULL == proc_xen_version)
+        {
+            ret = -ENOMEM;
+            printk(KERN_INFO "Xen-hcall: Couldn't create xen_version!\n");
+        }
+        filp_close(filp, NULL);
+        filp = NULL;
+    }
+#endif
+
     /*if VRM wirte control/vrm_flag value*/
 #if defined(VRM)
     xenbus_write(XBT_NIL, "control/uvp", "vrm_flag", "true");
@@ -121,6 +195,14 @@ module_init(hcall_procfs_init);
 static void hcall_procfs_exit(void)
 {
     remove_proc_entry( "xen_hcall", NULL );
+
+#if (defined PROC_XEN_VERSION)
+    if (proc_xen_version)
+    {
+        remove_proc_entry( "xen/version", NULL );
+    }
+#endif
+
     printk( KERN_INFO "xen_hcall: hypercall user-space has been deleted.\n" );
 }
 module_exit(hcall_procfs_exit);

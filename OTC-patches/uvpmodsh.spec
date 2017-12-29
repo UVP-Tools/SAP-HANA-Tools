@@ -53,56 +53,63 @@ The package also contains optimized versions of the well-known Xen PV drivers
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+
 # openSUSE > 42.1: PV_OPS
 %if 0%{?suse_version} > 1320
 set -- uvp-classic_xen_driver-3.12.xto3.16.x/*
-#set -- uvp-pvops_xen_driver-2.6.32to4.0.x/*
 # openSUSE13.x, SLES12
 %else 
-%if 0%{?suse_version} >= 1300
-set -- uvp-classic_xen_driver-3.12.xto3.16.x/*
-# SLES12SP1
-echo -e "export DRDIR=uvp-classic_xen_driver-3.12.xto3.16.x\nexport OSVERSION=3.12.49\nexport OSTYPE=SUSE12SP1" > setos.sh
-# SLES11
-%else
-%if 0%{?suse_version} >= 1100
-set -- uvp-classic_xen_driver-2.6.32to3.0.x/*
-# SLES11-SP3,4
-case $(uname -r) in
-	3.0.76*)
-		echo -e "export DRDIR=uvp-classic_xen_driver-2.6.32to3.0.x\nexport OSVERSION=3.0.76\nexport OSTYPE=SUSE11SP3" > setos.sh
-		sed -i 's@#obj-m += vni_front@obj-m += vni_front@' uvp-classic_xen_driver-2.6.32to3.0.x/Makefile
-		;;
-	*)
-		echo -e "export DRDIR=uvp-classic_xen_driver-2.6.32to3.0.x\nexport OSVERSION=3.0.101\nexport OSTYPE=SUSE11SP4" > setos.sh
-		sed -i 's@#obj-m += xen-scsi@obj-m += xen-scsi@' uvp-classic_xen_driver-2.6.32to3.0.x/Makefile
-		;;
-esac
-%else
-%if 0%{?suse_version} >= 900
-set -- others/SLES10/*
-%else
-%if 0%{?centos_version} < 600 && 0%{?centos_version} > 0
-set -- others/RHEL5/*
-%else
-# Non-SUSE: PV_OPS
-#set -- uvp-pvops_xen_driver-2.6.32to4.0.x/*
-%if 0%{?centos_version} >= 700 || 0%{?rhel_version} >= 700
-set -- uvp-classic_xen_driver-3.12.xto3.16.x/*
-echo -e "export DRDIR=uvp-classic_xen_driver-3.12.xto3.16.x\nexport OSVERSION=3.16.6\nexport OSTYPE=CENTOS7" > setos.sh
-%else
-set -- uvp-classic_xen_driver-2.6.32to3.0.x/*
+# SLES12SP2
+  %if 0%{?sle_version} == 120200
+  set -- uvp-classic_xen_driver-3.12.xto3.16.x/*
+  echo -e "export DRDIR=uvp-classic_xen_driver-3.12.xto3.16.x\nexport OSVERSION=4.4.21\nexport OSTYPE=SUSE12SP2" > setos.sh
+  %else
+  # SLES12SP1
+    %if 0%{?sle_version} == 120100
+    set -- uvp-classic_xen_driver-3.12.xto3.16.x/*
+    echo -e "export DRDIR=uvp-classic_xen_driver-3.12.xto3.16.x\nexport OSVERSION=3.12.49\nexport OSTYPE=SUSE12SP1" > setos.sh
+    # SLES11
+    %else
+      %if 0%{?suse_version} >= 1100
+      set -- uvp-classic_xen_driver-2.6.32to3.0.x/*
+      # SLES11-SP3,4
+      case $(uname -r) in
+      	3.0.76*)
+      		echo -e "export DRDIR=uvp-classic_xen_driver-2.6.32to3.0.x\nexport OSVERSION=3.0.76\nexport OSTYPE=SUSE11SP3" > setos.sh
+      		sed -i 's@#obj-m += vni_front@obj-m += vni_front@' uvp-classic_xen_driver-2.6.32to3.0.x/Makefile
+      		;;
+      	*)
+      		echo -e "export DRDIR=uvp-classic_xen_driver-2.6.32to3.0.x\nexport OSVERSION=3.0.101\nexport OSTYPE=SUSE11SP4" > setos.sh
+      		sed -i 's@#obj-m += xen-scsi@obj-m += xen-scsi@' uvp-classic_xen_driver-2.6.32to3.0.x/Makefile
+      		;;
+      esac
+      %else
+        %if 0%{?suse_version} >= 900
+        set -- others/SLES10/*
+        %else
+          %if 0%{?centos_version} < 600 && 0%{?centos_version} > 0
+          set -- others/RHEL5/*
+          %else
+            # Non-SUSE: PV_OPS
+            #set -- uvp-pvops_xen_driver-2.6.32to4.0.x/*
+            %if 0%{?centos_version} >= 700 || 0%{?rhel_version} >= 700
+            set -- uvp-classic_xen_driver-3.12.xto3.16.x/*
+            echo -e "export DRDIR=uvp-classic_xen_driver-3.12.xto3.16.x\nexport OSVERSION=3.16.6\nexport OSTYPE=CENTOS7" > setos.sh
+            %else
+            set -- uvp-classic_xen_driver-2.6.32to3.0.x/*
+            %endif
+          %endif
+        %endif
+      %endif
+    %endif
+  %endif
 %endif
-%endif
-%endif
-%endif
-%endif
-%endif
+
 ls -l
 if test -e setos.sh; then 
   source ./setos.sh
   cd $DRDIR
-  make lnfile OSVERSION=$OSVERSION
+  make lnfile OSVERSION=$OSVERSION OSTYPE=$OSTYPE
   cd ..
 fi
 mkdir source

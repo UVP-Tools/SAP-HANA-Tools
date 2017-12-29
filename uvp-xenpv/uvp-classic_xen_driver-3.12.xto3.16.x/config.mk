@@ -22,6 +22,18 @@ VERSION := $(shell cat /etc/SuSE-release | grep VERSION | awk -F" " '{print $$3}
 PATCHLEVEL := $(shell cat /etc/SuSE-release | grep PATCHLEVEL | awk -F" " '{print $$3}')
 OSTYPE := "SUSE$(VERSION)SP$(PATCHLEVEL)"
 
+ifeq ("3.12.11-201.nk.1.i686", "$(BUILDKERNEL)")
+  _XEN_CPPFLAGS += -DNEOKYLIN_DESKTOP_6
+endif
+
+ifeq ("4.4.21-69-default", "$(BUILDKERNEL)")
+  _XEN_CPPFLAGS += -DPROC_XEN_VERSION -DPROC_FS_DECLARE
+endif
+
+ifeq ("4.4.73-5-default", "$(BUILDKERNEL)")
+  _XEN_CPPFLAGS += -DPROC_XEN_VERSION -DPROC_FS_DECLARE
+endif
+
 AUTOCONF := $(shell find $(CROSS_COMPILE_KERNELSOURCE) -name autoconf.h)
 
 _XEN_CPPFLAGS += -include $(AUTOCONF)
@@ -29,3 +41,9 @@ _XEN_CPPFLAGS += -include $(AUTOCONF)
 EXTRA_CFLAGS += $(_XEN_CPPFLAGS)
 EXTRA_AFLAGS += $(_XEN_CPPFLAGS)
 CPPFLAGS := -I$(M)/include $(CPPFLAGS)
+
+ifeq ($(OSTYPE), $(filter "SUSE12SP0" "SUSE12SP1", $(OSTYPE)))
+SCSI_OBJ = xen-scsi
+else
+SCSI_OBJ = xen-scsifront
+endif

@@ -224,7 +224,11 @@ static void scsifront_gnttab_done(struct vscsifrnt_info *info, uint32_t id)
 			 * so it will not be picked again unless we run out of
 			 * persistent grants.
 			 */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+			gnttab_end_foreign_access(s->grants_used[i]->gref, 0, 0UL);
+#else
 			gnttab_end_foreign_access(s->grants_used[i]->gref, 0UL);
+#endif
 			s->grants_used[i]->gref = GRANT_INVALID_REF;
 			list_add_tail(&s->grants_used[i]->node, &info->grants);
 		}
@@ -240,7 +244,11 @@ static void scsifront_gnttab_done(struct vscsifrnt_info *info, uint32_t id)
 			} else {
 				struct page *indirect_page;
 
-				gnttab_end_foreign_access(s->indirect_grants[i]->gref, 0UL);	
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+				gnttab_end_foreign_access(s->indirect_grants[i]->gref, 0, 0UL);
+#else
+				gnttab_end_foreign_access(s->indirect_grants[i]->gref, 0UL);
+#endif
 				/*
 				 * Add the used indirect page back to the list of
 				 * available pages for indirect grefs.
@@ -537,13 +545,17 @@ static int map_data_for_request(struct vscsifrnt_info *info,
 				bytes = min_t(unsigned int, len, PAGE_SIZE - off);
 				bytes = min(bytes, data_len);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,21)
 				gnt_list_entry = get_grant(&gref_head, page_to_pfn(sg_page(sg)), info, write);
+#else
+				gnt_list_entry = get_grant(&gref_head, page_to_pfn(sg_page(sg)), info, 0);
+#endif
 				ref = gnt_list_entry->gref;
 
 				info->shadow[id].grants_used[ref_cnt] = gnt_list_entry;
 
 				/* If use persistent grant, it will have a memcpy,
-				 * just copy the data from sg page to grant page. 
+				 * just copy the data from sg page to grant page.
 				 */
 				if (write && info->feature_persistent) {
 					char *sg_data = NULL;
@@ -802,7 +814,11 @@ static int __init scsifront_init(void)
 {
 	int err;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+	if (!xen_domain())
+#else
 	if (!is_running_on_xen())
+#endif
 		return -ENODEV;
 
 	err = scsifront_xenbus_init();

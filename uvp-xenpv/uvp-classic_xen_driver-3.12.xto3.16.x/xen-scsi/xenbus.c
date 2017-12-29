@@ -97,7 +97,11 @@ static void scsifront_free_ring(struct vscsifrnt_info *info)
 
 	for (i = 0; i < info->ring_size; i++) {
 		if (info->ring_ref[i] != GRANT_INVALID_REF) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+			gnttab_end_foreign_access(info->ring_ref[i], 0, 0UL);
+#else
 			gnttab_end_foreign_access(info->ring_ref[i], 0UL);
+#endif
 			info->ring_ref[i] = GRANT_INVALID_REF;
 		}
 	}
@@ -121,7 +125,11 @@ void scsifront_resume_free(struct vscsifrnt_info *info)
 		                         &info->grants, node) {
 			list_del(&persistent_gnt->node);
 			if (persistent_gnt->gref != GRANT_INVALID_REF) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+				gnttab_end_foreign_access(persistent_gnt->gref, 0, 0UL);
+#else
 				gnttab_end_foreign_access(persistent_gnt->gref, 0UL);
+#endif
 				info->persistent_gnts_c--;
 			}
 			if (info->feature_persistent)
@@ -156,7 +164,11 @@ void scsifront_resume_free(struct vscsifrnt_info *info)
 		segs = info->shadow[i].nr_segments;
 		for (j = 0; j < segs; j++) {
 			persistent_gnt = info->shadow[i].grants_used[j];
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+			gnttab_end_foreign_access(persistent_gnt->gref, 0, 0UL);
+#else
 			gnttab_end_foreign_access(persistent_gnt->gref, 0UL);
+#endif
 			if (info->feature_persistent)
 				__free_page(pfn_to_page(persistent_gnt->pfn));
 			kfree(persistent_gnt);
@@ -171,7 +183,11 @@ void scsifront_resume_free(struct vscsifrnt_info *info)
 
 		for (j = 0; j < VSCSI_INDIRECT_PAGES(segs); j++) {
 			persistent_gnt = info->shadow[i].indirect_grants[j];
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+			gnttab_end_foreign_access(persistent_gnt->gref, 0, 0UL);
+#else
 			gnttab_end_foreign_access(persistent_gnt->gref, 0UL);
+#endif
 			__free_page(pfn_to_page(persistent_gnt->pfn));
 			kfree(persistent_gnt);
 		}
@@ -221,6 +237,9 @@ static int scsifront_alloc_ring(struct vscsifrnt_info *info)
 {
 	struct xenbus_device *dev = info->dev;
 	struct vscsiif_sring *sring;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+	grant_ref_t gref[VSCSIIF_MAX_RING_PAGES];
+#endif
 	int err = -ENOMEM;
 	int i;
 
@@ -228,7 +247,7 @@ static int scsifront_alloc_ring(struct vscsifrnt_info *info)
 		info->ring_ref[i] = GRANT_INVALID_REF;
 
 	/***** Frontend to Backend ring start *****/
-	sring = (struct vscsiif_sring *) __get_free_pages(GFP_KERNEL, 
+	sring = (struct vscsiif_sring *) __get_free_pages(GFP_KERNEL,
 					get_order(VSCSIIF_MAX_RING_PAGE_SIZE));
 	if (!sring) {
 		xenbus_dev_fatal(dev, err, "fail to allocate shared ring (Front to Back)");
@@ -236,7 +255,17 @@ static int scsifront_alloc_ring(struct vscsifrnt_info *info)
 	}
 	SHARED_RING_INIT(sring);
 	FRONT_RING_INIT(&info->ring, sring, (unsigned long)info->ring_size << PAGE_SHIFT);
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+	err = xenbus_grant_ring(dev, sring, info->ring_size, gref);
+	if (err < 0) {
+		info->ring.sring = NULL;
+		xenbus_dev_fatal(dev, err, "fail to grant shared ring (Front to Back)");
+		goto free_sring;
+	}
+	for (i = 0; i < info->ring_size; i++) {
+		info->ring_ref[i] = gref[i];
+	}
+#else
 	for (i = 0; i < info->ring_size; i++) {
 		err = xenbus_grant_ring(dev, virt_to_mfn((unsigned long)sring + i * PAGE_SIZE));
 		if (err < 0) {
@@ -246,7 +275,29 @@ static int scsifront_alloc_ring(struct vscsifrnt_info *info)
 		}
 		info->ring_ref[i] = err;
 	}
+#endif
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+	err = xenbus_alloc_evtchn(dev, &info->evtchn);
+	if (err) {
+		xenbus_dev_fatal(dev, err, "xenbus_alloc_evtchn");
+		goto free_sring;
+	}
+
+	err = bind_evtchn_to_irq(info->evtchn);
+	if (err <= 0) {
+		xenbus_dev_fatal(dev, err, "bind_evtchn_to_irq");
+		goto free_sring;
+	}
+	info->irq = err;
+
+	err = request_threaded_irq(info->irq, NULL, scsifront_intr,
+				IRQF_ONESHOT, "scsifront", info);
+	if (err) {
+		xenbus_dev_fatal(dev, err, "request_threaded_irq");
+		goto free_irq;
+	}
+#else
 	err = bind_listening_port_to_irqhandler(
 			dev->otherend_id, scsifront_intr,
 			0, "scsifront", info);
@@ -256,10 +307,15 @@ static int scsifront_alloc_ring(struct vscsifrnt_info *info)
 		goto free_sring;
 	}
 	info->irq = err;
+#endif
 
 	return 0;
 
 /* free resource */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+free_irq:
+	unbind_from_irqhandler(info->irq, info);
+#endif
 free_sring:
 	scsifront_free(info);
 
@@ -331,7 +387,11 @@ again:
 
 	what = "event-channel";
 	err = xenbus_printf(xbt, dev->nodename, what, "%u",
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+				info->evtchn);
+#else
 				irq_to_evtchn_port(info->irq));
+#endif
 	if (err)
 		goto fail;
 
@@ -434,7 +494,20 @@ static int scsifront_resume(struct xenbus_device *dev)
 	struct Scsi_Host *host = info->host;
 	int err;
 
+	/* no new commands for the backend */
 	spin_lock_irq(host->host_lock);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+	info->pause = 1;
+	while (info->callers && !err) {
+		info->waiting_pause = 1;
+		info->waiting_sync = 0;
+		spin_unlock_irq(host->host_lock);
+		wake_up(&info->wq_sync);
+		err = wait_event_interruptible(info->wq_pause,
+					       !info->waiting_pause);
+		spin_lock_irq(host->host_lock);
+	}
+#endif
 
 	/* finish all still pending commands */
 	scsifront_finish_all(info);
@@ -463,6 +536,7 @@ static int scsifront_suspend(struct xenbus_device *dev)
 	struct Scsi_Host *host = info->host;
 	int err = 0;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,21)
 	/* no new commands for the backend */
 	spin_lock_irq(host->host_lock);
 	info->pause = 1;
@@ -476,6 +550,8 @@ static int scsifront_suspend(struct xenbus_device *dev)
 		spin_lock_irq(host->host_lock);
 	}
 	spin_unlock_irq(host->host_lock);
+#endif
+
 	return err;
 }
 
@@ -804,6 +880,18 @@ static const struct xenbus_device_id scsifront_ids[] = {
 };
 MODULE_ALIAS("xen:vscsi");
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+static struct xenbus_driver scsifront_driver = {
+	.driver.mod_name	= KBUILD_MODNAME,
+	.driver.owner		= THIS_MODULE,
+	.ids			= scsifront_ids,
+	.probe			= scsifront_probe,
+	.remove			= scsifront_remove,
+	.resume			= scsifront_resume,
+	.suspend		= scsifront_suspend,
+	.otherend_changed	= scsifront_backend_changed,
+};
+#else
 static DEFINE_XENBUS_DRIVER(scsifront, ,
 	.probe			= scsifront_probe,
 	.remove			= scsifront_remove,
@@ -812,6 +900,7 @@ static DEFINE_XENBUS_DRIVER(scsifront, ,
 	.suspend_cancel		= scsifront_suspend_cancel,
 	.otherend_changed	= scsifront_backend_changed,
 );
+#endif
 
 int __init scsifront_xenbus_init(void)
 {

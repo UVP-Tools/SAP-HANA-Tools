@@ -1,6 +1,6 @@
 include $(M)/config.mk
 
-obj-m += xen-scsi.o
+obj-m += $(SCSI_OBJ).o
 
-xen-scsi-objs := scsifront.o xenbus.o
+$(SCSI_OBJ)-objs := scsifront.o xenbus.o
 

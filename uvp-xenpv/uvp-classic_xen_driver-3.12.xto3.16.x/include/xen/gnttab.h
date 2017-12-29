@@ -38,7 +38,18 @@
 #define __ASM_GNTTAB_H__
 
 #include <asm/hypervisor.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,21)
+/* Definitions for machine and pseudophysical addresses. */
+#ifdef CONFIG_X86_PAE
+typedef unsigned long long paddr_t;
+typedef unsigned long long maddr_t;
+#else
+typedef unsigned long paddr_t;
+typedef unsigned long maddr_t;
+#endif
+#else
 #include <asm/maddr.h> /* maddr_t */
+#endif
 #include <linux/mm.h>
 #include <linux/delay.h>
 #include <xen/interface/grant_table.h>
