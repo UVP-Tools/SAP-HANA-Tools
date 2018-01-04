@@ -42,7 +42,7 @@ EXTRA_CFLAGS += $(_XEN_CPPFLAGS)
 EXTRA_AFLAGS += $(_XEN_CPPFLAGS)
 CPPFLAGS := -I$(M)/include $(CPPFLAGS)
 
-ifeq ($(OSTYPE), $(filter "SUSE12SP0" "SUSE12SP1", $(OSTYPE)))
+ifeq ($(OSTYPE), $(filter SUSE12SP0 SUSE12SP1, $(OSTYPE)))
 SCSI_OBJ = xen-scsi
 else
 SCSI_OBJ = xen-scsifront
