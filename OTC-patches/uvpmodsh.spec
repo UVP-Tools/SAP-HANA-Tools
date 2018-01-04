@@ -13,8 +13,8 @@ BuildRequires: %kernel_module_package_buildreqs
 License:	GPL-2.0
 Group:		System/Kernel
 Summary:	Xen kernel drivers for enhanced monitoring and performance 
-Version:	2.2.0.312
-Release:	18.1
+Version:	2.5.0.115
+Release:	1.0
 Source0:	SAP-HANA-Tools-%{version}.tar.gz
 Source1:	preamble
 Patch0:		kverdep.diff
@@ -175,6 +175,9 @@ rm -f $RPM_BUILD_ROOT/lib/modules/*/modules.*
 rm -rf %{buildroot}
 
 %changelog
+* THU Jan  4 2018 jinjian@huawei.com
+- Update to SAP-HANA-Tools-2.5.0.115:
+  * Xen front-driver for SLE12SP2 including pvscsi.
 * Fri Sep  9 2016 kurt@garloff.de
 - Mark modules as externally supported.
 * Tue Sep  6 2016 kurt@garloff.de

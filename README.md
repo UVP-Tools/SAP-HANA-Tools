@@ -1,5 +1,5 @@
-    SAP-HANA-Tools 2.2.0.xxx
-The following is the readme file of SAP-HANA-Tools 2.2.0. From the readme file, you will learn what a SAP-HANA-Tools project is, how source code of SAP-HANA-Tools is structured, and how SAP-HANA-Tools is installed.
+    SAP-HANA-Tools 2.5.0.xxx
+The following is the readme file of SAP-HANA-Tools 2.5.0. From the readme file, you will learn what a SAP-HANA-Tools project is, how source code of SAP-HANA-Tools is structured, and how SAP-HANA-Tools is installed.
 
 What Is a SAP-HANA-Tools Project?
 
@@ -17,7 +17,7 @@ Components of the Xen front-end driver:
 
 Structure of SAP-HANA-Tools source code:
 
-SAP-HANA-Tools-2.2.0.xxx
+SAP-HANA-Tools-2.5.0.xxx
 
 bin/             # Directory that stores tools required for installing, such as the tool used for acquiring Linux distribution information.
 
@@ -42,11 +42,11 @@ Installing SAP-HANA-Tools
   - Obtain the SAP-HANA-Tools source code package. Save the SAP-HANA-Tools source code package to a directory on the Linux VM where SAP-HANA-Tools will be installed, and unpack the SAP-HANA-Tools source code package. Be sure that you have the permission to access this directory.
     - If the downloaded SAP-HANA-Tools source code package is an official release, run the following command: 
 
-        tar -xzf SAP-HANA-Tools-2.2.0.xxx.tar.gz
+        tar -xzf SAP-HANA-Tools-2.5.0.xxx.tar.gz
 
         Or
 
-        unzip SAP-HANA-Tools-2.2.0.xxx.zip
+        unzip SAP-HANA-Tools-2.5.0.xxx.zip
 
     - If the downloaded SAP-HANA-Tools source code package is a source code package of the master branch, run the following command: 
 
@@ -77,11 +77,11 @@ The Linux VM where SAP-HANA-Tools will be installed must come with gcc, make, li
         Note: "xen-kmp-default-4.2.2_04_3.0.76_0.11-0.7.5" is merely an example. Replace it with the Xen front-end driver installed on the Linux VM. 
 
   Alternatively, you can use the build_tools script to build a SAP-HANA-Tools installation package for the Linux VM. Take SLES 11 SP3 x86_64 as an example. 
-  - After the SAP-HANA-Tools source code package is unpacked, run the following command in the SAP-HANA-Tools-2.2.0.xxx directory to build the SAP-HANA-Tools installation package: 
+  - After the SAP-HANA-Tools source code package is unpacked, run the following command in the SAP-HANA-Tools-2.5.0.xxx directory to build the SAP-HANA-Tools installation package: 
 
         make all
 
-  A directory named SAP-HANA-tools-linux-2.2.0.xxx is generated in the current directory after the make all command is run. Go to the SAP-HANA-tools-linux-2.2.0.xxx directory and run the following command to execute the SAP-HANA-Tools installation script install. 
+  A directory named SAP-HANA-tools-linux-2.5.0.xxx is generated in the current directory after the make all command is run. Go to the SAP-HANA-tools-linux-2.5.0.xxx directory and run the following command to execute the SAP-HANA-Tools installation script install. 
   
         ./install
 
