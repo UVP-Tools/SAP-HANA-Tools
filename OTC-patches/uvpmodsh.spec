@@ -175,7 +175,7 @@ rm -f $RPM_BUILD_ROOT/lib/modules/*/modules.*
 rm -rf %{buildroot}
 
 %changelog
-* THU Jan  4 2018 jinjian@huawei.com
+* Thu Jan  4 2018 jinjian@huawei.com
 - Update to SAP-HANA-Tools-2.5.0.115:
   * Xen front-driver for SLE12SP2 including pvscsi.
 * Fri Sep  9 2016 kurt@garloff.de
